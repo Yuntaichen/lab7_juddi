@@ -63,13 +63,16 @@ public class ServiceSearch {
 
                         String checkServiceName = ListToString(serviceInfos.getServiceInfo().get(j).getName());
                         if (checkServiceName.equals(serviceName)) {
-//                            System.out.println("Business Key: " + businessInfos.getBusinessInfo().get(i).getBusinessKey());
-//                            System.out.println("Service Key: " + serviceKey);
-//                            System.out.println("Owning Business Key: " + serviceInfos.getServiceInfo().get(j).getBusinessKey());
-//                            System.out.println("Name: " + checkServiceName);
+                            System.out.println("Business Key: " + businessInfos.getBusinessInfo().get(i).getBusinessKey());
+                            System.out.println("Owning Business Key: " + serviceInfos.getServiceInfo().get(j).getBusinessKey());
+                            System.out.println("Name: " + checkServiceName);
+
                             // выводит идентификатор имени сервиса в списке [org.uddi.api_v3.Name@5386659f]
                             System.out.println(serviceInfos.getServiceInfo().get(j).getName());
-                            return serviceInfos.getServiceInfo().get(j).getServiceKey();
+
+                            String serviceKey = serviceInfos.getServiceInfo().get(j).getServiceKey();
+                            System.out.println("Service Key: " + serviceKey);
+                            return serviceKey;
                         }
                     }
                 } catch (NullPointerException ex) {
