@@ -1,6 +1,7 @@
 package com.labs;
 
 
+import com.labs.client.WebServiceClient;
 import org.apache.juddi.api_v3.AccessPointType;
 import org.apache.juddi.v3.client.UDDIConstants;
 import org.apache.juddi.v3.client.config.UDDIClient;
@@ -11,6 +12,7 @@ import org.uddi.v3_service.UDDIPublicationPortType;
 import org.uddi.v3_service.UDDISecurityPortType;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,41 +27,82 @@ public class JUDDIApp {
      */
     public static void main(String[] args) {
 
-        String searchServiceName = "CRUDService";
-        String userName = "uddiadmin";
-        String userPass = "da_password1";
+        // Get data from console in
+        Scanner scanner = new Scanner(System.in);
 
-        // Create UDDIClient and proxy to config, add references to UDDI API
-        JUDDIApp sp = new JUDDIApp();
-        // Get Auth token as String
-        String token = sp.getUDDIToken(userName, userPass);
-
-        // Register new service (for jUDDI v.3.0 and higher)
-        String businessName ="Brand New Business";
-        String registeredServiceName ="CRUDService";
-        String registeredServiceURL ="http://localhost:8080/CRUDService?wsdl";
-        sp.registerNewService(token, businessName, registeredServiceName, registeredServiceURL);
-
-        // Search service
-        String accessPoint;
-        try {
-            accessPoint = sp.searchService(sp.GetBusinessList(inquiry, token).getBusinessInfos(), inquiry, token, searchServiceName);
-            System.out.println("Access Point: " + accessPoint);
-        } catch (Exception ex) {
-            Logger.getLogger(JUDDIApp.class.getName()).log(Level.SEVERE, null, ex);
-            ex.printStackTrace();
+        System.out.println("Please, input your jUDDI admin username (default: uddiadmin)?");
+        String userName = scanner.nextLine();
+        if (userName.trim().isEmpty()) {
+            userName = "uddiadmin";
+        }
+        System.out.println("Please, input your jUDDI admin password (default: da_password1)?");
+        String userPass = scanner.nextLine();
+        if (userPass.trim().isEmpty()) {
+            userPass = "da_password1";
         }
 
-        System.out.println(security);
-        System.out.println(inquiry);
-        System.out.println(token);
+        // Create UDDIClient and proxy to config, add references to UDDI API
+        JUDDIApp app = new JUDDIApp();
+        // Get Auth token as String
+        String token = app.getUDDIToken(userName, userPass);
 
+        // Register new service (for jUDDI v.3.0 and higher)
+        System.out.println("Do you want to register a new Business/Service? (y -> yes, other -> no)");
+        String agree = scanner.nextLine();
+        if (agree.equals("y")) {
 
+            System.out.println("What jUDDI Business Name will we use (default: Custom Business)?");
+            String businessName = scanner.nextLine();
+            if (businessName.trim().isEmpty()) {
+                businessName = "Custom Business";
+            }
+
+            System.out.println("What jUDDI Service Name will we use (default: CRUDService)?");
+            String registeredServiceName = scanner.nextLine();
+            if (businessName.trim().isEmpty()) {
+                businessName = "CRUDService";
+            }
+
+            System.out.println("What jUDDI Service Access Point (default: http://localhost:8090/CRUDService?wsdl)?");
+            String registeredServiceURL = scanner.nextLine();
+            if (registeredServiceURL.trim().isEmpty()) {
+                registeredServiceURL = "http://localhost:8090/CRUDService?wsdl";
+            }
+            app.registerNewService(token, businessName, registeredServiceName, registeredServiceURL);
+        }
+
+        System.out.println("Do you want to search and request some Service? (y -> yes, other -> no)");
+        agree = scanner.nextLine();
+        if (agree.equals("y")) {
+
+            System.out.println("What jUDDI Service Name will we search (default: CRUDService)?");
+            String searchServiceName = scanner.nextLine();
+            if (searchServiceName.trim().isEmpty()) {
+                searchServiceName = "CRUDService";
+            }
+
+            // Search service
+            String accessPoint;
+            try {
+                accessPoint = app.searchService(app.GetBusinessList(inquiry, token).getBusinessInfos(), inquiry, token, searchServiceName);
+                System.out.println("Do you want to request this service now? (y -> yes, other -> no)");
+                agree = scanner.nextLine();
+                if (agree.equals("y")) {
+                    WebServiceClient serviceClient = new WebServiceClient();
+                    serviceClient.serviceRequest(accessPoint);
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(JUDDIApp.class.getName()).log(Level.SEVERE, null, ex);
+                ex.printStackTrace();
+            }
+        }
 
         try {
             security.discardAuthToken(new DiscardAuthToken(token));
         } catch (RemoteException ex) {
             Logger.getLogger(JUDDIApp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            scanner.close();
         }
 
     }
@@ -123,7 +166,7 @@ public class JUDDIApp {
         try {
             BusinessDetail bd = publish.saveBusiness(sb);
             String myBusKey = bd.getBusinessEntity().get(0).getBusinessKey();
-            System.out.println("myBusiness key:  " + myBusKey);
+//            System.out.println("myBusiness key:  " + myBusKey);
 
             // Creating a service to save.
             // Only adding the minimum data: the parent business key retrieved
@@ -207,12 +250,12 @@ public class JUDDIApp {
                     gsd.getServiceKey().add(businessInfos.getBusinessInfo().get(i).getServiceInfos().getServiceInfo().get(k).getServiceKey());
                 }
                 gsd.setAuthInfo(token);
-                System.out.println("Fetching data for business " + businessInfos.getBusinessInfo().get(i).getBusinessKey());
                 ServiceDetail serviceDetail = inquiry.getServiceDetail(gsd);
                 for (int k = 0; k < serviceDetail.getBusinessService().size(); k++) {
                     BusinessService get = serviceDetail.getBusinessService().get(k);
 
                     if (ListToString(get.getName()).equals(serviceName)) {
+                        System.out.println("Fetching Service Access Point for Business " + businessInfos.getBusinessInfo().get(i).getBusinessKey());
                         return  getServiceAccessPoint(get.getBindingTemplates());
                     }
                 }

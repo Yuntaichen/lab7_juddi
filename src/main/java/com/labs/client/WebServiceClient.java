@@ -10,16 +10,9 @@ import java.util.logging.Logger;
 
 
 public class WebServiceClient {
-    String accessPoint;
 
-    public WebServiceClient(){};
-
-    public WebServiceClient(String accessPoint) {
-
-    }
-
-    public static void main(String[] args) throws MalformedURLException {
-        URL url = new URL("http://localhost:8080/CRUDService?wsdl");
+    public void serviceRequest(String accessPoint) throws MalformedURLException {
+        URL url = new URL(accessPoint);
         CRUDService studentService = new CRUDService(url);
 
         // Консольный выбор CRUD метода
