@@ -253,6 +253,7 @@ public class JUDDIApp {
 
                     if (ListToString(get.getName()).equals(serviceName)) {
                         System.out.println("Fetching Service Access Point for Business " + businessInfos.getBusinessInfo().get(i).getBusinessKey());
+                        System.out.println("We find this service in jUDDI register!");
                         return  getServiceAccessPoint(get.getBindingTemplates());
                     }
                 }
@@ -294,7 +295,5 @@ public class JUDDIApp {
         }
         return sb.toString();
     }
-
-
 
 }
