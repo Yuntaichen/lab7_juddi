@@ -56,8 +56,8 @@ public class JUDDIApp {
 
             System.out.println("What jUDDI Service Name will we use (default: CRUDService)?");
             String registeredServiceName = scanner.nextLine();
-            if (businessName.trim().isEmpty()) {
-                businessName = "CRUDService";
+            if (registeredServiceName.trim().isEmpty()) {
+                registeredServiceName = "CRUDService";
             }
 
             System.out.println("What jUDDI Service Access Point (default: http://localhost:8090/CRUDService?wsdl)?");

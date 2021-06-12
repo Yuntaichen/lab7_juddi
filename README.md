@@ -297,7 +297,7 @@ serviceClient.serviceRequest(accessPoint);
 Далее реализуем ввод данных из консоли по аналогии с предыдущими лабораторными работами и при этом установим значения по умолчанию:
 
 ```java
-    public static void main(String[] args) {
+public static void main(String[] args) {
 
         // Get data from console in
         Scanner scanner = new Scanner(System.in);
@@ -331,8 +331,8 @@ serviceClient.serviceRequest(accessPoint);
 
             System.out.println("What jUDDI Service Name will we use (default: CRUDService)?");
             String registeredServiceName = scanner.nextLine();
-            if (businessName.trim().isEmpty()) {
-                businessName = "CRUDService";
+            if (registeredServiceName.trim().isEmpty()) {
+                registeredServiceName = "CRUDService";
             }
 
             System.out.println("What jUDDI Service Access Point (default: http://localhost:8090/CRUDService?wsdl)?");
@@ -378,5 +378,25 @@ serviceClient.serviceRequest(accessPoint);
         }
 
     }
+```
+
+Пробуем запустить консольный клиент и выполнить необходимые действия, т. е.:
+
+1. Зарегистрировать сервис;
+2. Найти сервис;
+3. Обратиться к сервису.
+
+
+
+
+
+
+
+Далее производим рефакторинг кода и окончательную версию добавляем в репозиторий на GitHub по ссылке https://github.com/Yuntaichen/lab7_juddi.
+
+Получить исходный код, можно выполнив:
+
+```shell
+git clone https://github.com/Yuntaichen/lab7_juddi.git
 ```
 
