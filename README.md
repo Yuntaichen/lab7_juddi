@@ -210,5 +210,79 @@ public class ServiceSearch {
 
 Теперь мы попросту будем возвращать accessPoint в виде строки, например `http://localhost:8080/CRUDService?wsdl` и далее при его помощи обращаться к сервису.
 
+Приведем также реализацию для регистрации нового сервиса (метод registerNewService в основном классе JUDDIApp):
+
+```java
+    private void registerNewService(
+            String token,
+            String businessName,
+            String registeredServiceName,
+            String registeredServiceURL) {
+        // Creating the parent business entity that will contain our service.
+        BusinessEntity myBusEntity = new BusinessEntity();
+        Name myBusName = new Name();
+        myBusName.setValue(businessName);
+        myBusEntity.getName().add(myBusName);
+
+        // Adding the business entity to the "save" structure, using our
+        // publisher's authentication info and saving away.
+        SaveBusiness sb = new SaveBusiness();
+        sb.getBusinessEntity().add(myBusEntity);
+        sb.setAuthInfo(token);
+
+        try {
+            BusinessDetail bd = publish.saveBusiness(sb);
+            String myBusKey = bd.getBusinessEntity().get(0).getBusinessKey();
+            System.out.println("myBusiness key:  " + myBusKey);
+
+            // Creating a service to save.
+            // Only adding the minimum data: the parent business key retrieved
+            // from saving the business
+            // above and a single name.
+            BusinessService myService = new BusinessService();
+            myService.setBusinessKey(myBusKey);
+            Name myServName = new Name();
+            myServName.setValue(registeredServiceName);
+            myService.getName().add(myServName);
+
+            // Add binding templates, etc...
+            BindingTemplate myBindingTemplate = new BindingTemplate();
+            AccessPoint accessPoint = new AccessPoint();
+            accessPoint.setUseType(AccessPointType.WSDL_DEPLOYMENT.toString());
+            accessPoint.setValue(registeredServiceURL);
+            myBindingTemplate.setAccessPoint(accessPoint);
+            BindingTemplates myBindingTemplates = new BindingTemplates();
+            // optional but recommended step, this annotations our binding with all
+            // the standard SOAP tModel instance infos
+            myBindingTemplate = UDDIClient.addSOAPtModels(myBindingTemplate);
+            myBindingTemplates.getBindingTemplate().add(myBindingTemplate);
+
+            myService.setBindingTemplates(myBindingTemplates);
+
+            // Adding the service to the "save" structure, using our publisher's
+            // authentication info and saving away.
+            SaveService ss = new SaveService();
+            ss.getBusinessService().add(myService);
+            ss.setAuthInfo(token);
+            ServiceDetail sd = publish.saveService(ss);
+            String myServKey = sd.getBusinessService().get(0).getServiceKey();
+            System.out.println("myService key:  " + myServKey);
+
+            // Now you have published a business and service via
+            // the jUDDI API!
+            System.out.println("New service successfully registered!");
+
+        } catch (RemoteException ex) {
+            Logger.getLogger(JUDDIApp.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+        }
+    }
+```
+
+
+
 Для обращения к сервису возьмем ранее разработанный код клиента (см. Лабораторная работа 3), со сгенерированным интерфейсом по WSDL-описанию. То есть для обращения к сервису, нам потребуется лишь передать accessPoint клиенту и вызвать необходимые методы.
 
+Таким образом, просто скопируем пакет com.labs.client из лабораторной работы 3 и получаем класс WebServiceClient, в котором изменим реализацию, чтобы обращаться к клиенту из основного класса JUDDIApp и передавать соответствующий accessPoint. 
+
+Для большего удобства перенесем методы класса ServiceSearch в основной класс JUDDIApp и будем обращаться к ним по создаваемому экземпляру класса JUDDIApp (без отдельного класса). Далее с полученным значением AccessPoint для сервиса необходимо вызывать методы клиента. В классе WebServiceClient мы изменим метод main на неститический метод, который потребует создания объекта, а также добавим конструктор, в аргументах которого укажем передачу access point, что позволит создавать экземпляры класса клиента, передавая им соответствующий accesspoint.
