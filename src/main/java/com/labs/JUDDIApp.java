@@ -33,20 +33,20 @@ public class JUDDIApp {
         String token = sp.getUDDIToken(userName, userPass);
 
         // Register new service (for jUDDI v.3.0 and higher)
-        String businessName ="Brand New Business";
-        String registeredServiceName ="CRUDService";
-        String registeredServiceURL ="http://localhost:8080/CRUDService?wsdl";
-        sp.registerNewService(token, businessName, registeredServiceName, registeredServiceURL);
+//        String businessName ="Brand New Business";
+//        String registeredServiceName ="CRUDService";
+//        String registeredServiceURL ="http://localhost:8080/CRUDService?wsdl";
+//        sp.registerNewService(token, businessName, registeredServiceName, registeredServiceURL);
 
         // Search service
         ServiceSearch ss = new ServiceSearch();
-        String serviceKey = ss.searchAndGetService(inquiry, token, searchServiceName);
+        String accessPoint = ss.getAccessServicePoint(inquiry, token, searchServiceName);
 
         System.out.println(security);
         System.out.println(inquiry);
         System.out.println(token);
 
-        System.out.println(serviceKey);
+        System.out.println("Access Point: " + accessPoint);
 
         try {
             security.discardAuthToken(new DiscardAuthToken(token));
