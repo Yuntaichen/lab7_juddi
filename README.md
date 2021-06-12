@@ -294,3 +294,89 @@ WebServiceClient serviceClient = new WebServiceClient();
 serviceClient.serviceRequest(accessPoint);
 ```
 
+Далее реализуем ввод данных из консоли по аналогии с предыдущими лабораторными работами и при этом установим значения по умолчанию:
+
+```java
+    public static void main(String[] args) {
+
+        // Get data from console in
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Please, input your jUDDI admin username (default: uddiadmin)?");
+        String userName = scanner.nextLine();
+        if (userName.trim().isEmpty()) {
+            userName = "uddiadmin";
+        }
+        System.out.println("Please, input your jUDDI admin password (default: da_password1)?");
+        String userPass = scanner.nextLine();
+        if (userPass.trim().isEmpty()) {
+            userPass = "da_password1";
+        }
+
+        // Create UDDIClient and proxy to config, add references to UDDI API
+        JUDDIApp app = new JUDDIApp();
+        // Get Auth token as String
+        String token = app.getUDDIToken(userName, userPass);
+
+        // Register new service (for jUDDI v.3.0 and higher)
+        System.out.println("Do you want to register a new Business/Service? (y -> yes, other -> no)");
+        String agree = scanner.nextLine();
+        if (agree.equals("y")) {
+
+            System.out.println("What jUDDI Business Name will we use (default: Custom Business)?");
+            String businessName = scanner.nextLine();
+            if (businessName.trim().isEmpty()) {
+                businessName = "Custom Business";
+            }
+
+            System.out.println("What jUDDI Service Name will we use (default: CRUDService)?");
+            String registeredServiceName = scanner.nextLine();
+            if (businessName.trim().isEmpty()) {
+                businessName = "CRUDService";
+            }
+
+            System.out.println("What jUDDI Service Access Point (default: http://localhost:8090/CRUDService?wsdl)?");
+            String registeredServiceURL = scanner.nextLine();
+            if (registeredServiceURL.trim().isEmpty()) {
+                registeredServiceURL = "http://localhost:8090/CRUDService?wsdl";
+            }
+            app.registerNewService(token, businessName, registeredServiceName, registeredServiceURL);
+        }
+
+        System.out.println("Do you want to search and request some Service? (y -> yes, other -> no)");
+        agree = scanner.nextLine();
+        if (agree.equals("y")) {
+
+            System.out.println("What jUDDI Service Name will we search (default: CRUDService)?");
+            String searchServiceName = scanner.nextLine();
+            if (searchServiceName.trim().isEmpty()) {
+                searchServiceName = "CRUDService";
+            }
+
+            // Search service
+            String accessPoint;
+            try {
+                accessPoint = app.searchService(app.GetBusinessList(inquiry, token).getBusinessInfos(), inquiry, token, searchServiceName);
+                System.out.println("Do you want to request this service now? (y -> yes, other -> no)");
+                agree = scanner.nextLine();
+                if (agree.equals("y")) {
+                    WebServiceClient serviceClient = new WebServiceClient();
+                    serviceClient.serviceRequest(accessPoint);
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(JUDDIApp.class.getName()).log(Level.SEVERE, null, ex);
+                ex.printStackTrace();
+            }
+        }
+
+        try {
+            security.discardAuthToken(new DiscardAuthToken(token));
+        } catch (RemoteException ex) {
+            Logger.getLogger(JUDDIApp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            scanner.close();
+        }
+
+    }
+```
+

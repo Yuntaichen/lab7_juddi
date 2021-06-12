@@ -22,9 +22,6 @@ public class JUDDIApp {
     private static UDDIInquiryPortType inquiry = null;
     private static UDDIPublicationPortType publish = null;
 
-    /**
-     * Main entry point
-     */
     public static void main(String[] args) {
 
         // Get data from console in
